@@ -7,31 +7,30 @@ A scalable backend system built in Go (Golang) that implements the Slowly Changi
 
 This system handles historical data changes without data loss, suitable for auditability, analytics, and data warehousing. It uses:
 
-id + version as the primary key
+* id + version as the primary key
 
-uid as the public-facing stable identifier
+* uid as the public-facing stable identifier
 
-Each update creates a new version of a record while preserving the old
+* Each update creates a new version of a record while preserving the old
 
-Use Cases:
-Track job versions over time
+## Use Cases:
 
-Ensure consistency of related records via uid-based relations
-
-Perform clean updates with traceability
+- Track job versions over time
+- Ensure consistency of related records via uid-based relations
+- Perform clean updates with traceability
 
 ### ⚙️ Tech Stack
 
-Layer Technology
-Language Go (Golang)
-Framework Gin
-ORM GORM
-Database PostgreSQL
-Package Mgmt Go Modules
-Architecture Clean Architecture + SCD Abstraction
+* Layer Technology
+* Language Go (Golang)
+* Framework Gin
+* ORM GORM
+* Database PostgreSQL
+* Package Mgmt Go Modules
+* Architecture Clean Architecture + SCD Abstraction
 
 ### 🧱 High-Level Architecture
-
+```
 +------------------+
 | Client |
 | (Postman/Curl) |
@@ -66,7 +65,7 @@ v
 | jobs / timelogs / |
 | payments tables |
 +-------------------+
-
+```
 ## Key Improvements
 
 ### 1. Performance Optimization
@@ -271,7 +270,7 @@ history, err := jobRepo.GetVersionHistory(jobID)
 
 ### Project Structure
 
-.
+```
 ├── cmd/
 │ └── main.go # Application entry point
 ├── internal/
@@ -288,57 +287,113 @@ history, err := jobRepo.GetVersionHistory(jobID)
 ├── test_script.sh # Shell script for testing
 └── README.md # Project documentation
 
+```
+
+### How to start ?
+
+🚀 Getting Started
+This guide will help you set up and run the project on your local machine.
+
+✅ Prerequisites
+Before you begin, make sure the following are installed:
+
+* Go (v1.18+ recommended)
+
+* PostgreSQL (ensure it's running)
+
+Clone the Repository
+```bash
+git clone https://github.com/shrutigrover25/SDC-Implementation.git
+cd SDC-Implementation
+```
+⚙️ Setup PostgreSQL
+* Create a database (e.g., mercor):
+```
+psql -U postgres
+CREATE DATABASE mercor;
+```
+(Optional) Update your connection string if needed:
+
+* Edit .env or check db.Connect() in internal/config/db.go:
+```
+dsn := "host=localhost user=postgres password=yourpassword dbname=mercor port=5432 sslmode=disable"
+```
+🛠️ Run Migrations & Seed Data
+
+```go run main.go```
+
+This will:
+* Auto-migrate all tables (Jobs, Timelogs, PaymentLineItems)
+
+* Seed the database with test data (using SCD structure)
+
+* Logs like Seeding jobs... will confirm setup success.
+
+🧪 Run Tests (Optional)
+```
+bash test_script.sh
+```
+
+📬 API Access (via Postman or Curl)
+Start the server:
+
+```go run main.go```
+
+* API will run at: http://localhost:8080
+
+* Use Postman or curl to test APIs like:
+
 ### Design Principles
 
-SCD Type 2: Preserve full record history with new versions
+✔️SCD Type 2: Preserve full record history with new versions
 
-Generic Abstraction: Reusable manager layer
+✔️Generic Abstraction: Reusable manager layer
 
-Separation of Concerns: Service → Repo → DB
+✔️Separation of Concerns: Service → Repo → DB
 
-UID-based Relations: Ensure version accuracy across links
+✔️UID-based Relations: Ensure version accuracy across links
 
 ### Scalability
 
-Modular project structure for independent development of domains.
+✔️Modular project structure for independent development of domains.
 
-Versioning support for historical audit and rollback capabilities.
+✔️Versioning support for historical audit and rollback capabilities.
 
-PostgreSQL used for relational consistency.
+✔️PostgreSQL used for relational consistency.
 
-Can easily scale horizontally behind a load balancer (stateless).
+✔️Can easily scale horizontally behind a load balancer (stateless).
 
-### ✅ Security Compliances
+### Security Compliances
 
-Validations for UUIDs and request payloads.
+💻Validations for UUIDs and request payloads.
 
-Separation of concerns: no business logic in route handlers.
+💻Separation of concerns: no business logic in route handlers.
 
-Easy to extend with auth middleware (e.g., JWT or OAuth).
+💻Easy to extend with auth middleware (e.g., JWT or OAuth).
 
-Can integrate TLS for HTTPS support.
+💻Can integrate TLS for HTTPS support.
 
-Supports environment-based config using .env or secret managers.
+💻Supports environment-based config using .env or secret managers.
 
 #### 🌱 Future Enhancements
 
-Add authentication and authorization (JWT/OAuth).
+🔮Add authentication and authorization (JWT/OAuth).
 
-Swagger/OpenAPI integration for live API docs.
+🔮Swagger/OpenAPI integration for live API docs.
 
-Pagination and filtering for GET APIs.
+🔮Pagination and filtering for GET APIs.
 
-Soft/hard delete distinction and archival.
+🔮Soft/hard delete distinction and archival.
 
-Role-based access control (admin, contractor, etc.).
+🔮Role-based access control (admin, contractor, etc.).
 
-Metrics and logging middleware.
+🔮Metrics and logging middleware.
 
-CI/CD pipeline setup.
+🔮CI/CD pipeline setup.
 
-Integration tests and unit test coverage.
+🔮Integration tests and unit test coverage.
 
-Containerization and Kubernetes deployment support.
+🔮Containerization and Kubernetes deployment support.
 
 ### Testing
 
@@ -348,10 +403,10 @@ The abstraction includes full test coverage and is backward compatible.
 
 This SCD abstraction:
 
-Boosts performance by 3–5x
+✔️Boosts performance by 3–5x
 
-Reduces code by 70%
+✔️Reduces code by 70%
 
-Increases type safety and compile-time assurance
+✔️Increases type safety and compile-time assurance
 
-Scales with millions of records
+✔️Scales with millions of records
