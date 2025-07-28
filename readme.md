@@ -303,8 +303,8 @@ Before you begin, make sure the following are installed:
 
 Clone the Repository
 ```bash
-git clone https://github.com/shrutigrover25/SDC-Implementation.git
-cd SDC-Implementation
+git clone https://github.com/shrutigrover25/SCD-Implementation.git
+cd SCD-Implementation
 ```
 ⚙️ Setup PostgreSQL
 * Create a database (e.g., mercor):
