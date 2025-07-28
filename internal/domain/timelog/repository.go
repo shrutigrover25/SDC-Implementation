@@ -1,61 +1,67 @@
 package timelog
 
 import (
+	"time"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"mercor/internal/scd"
 )
 
 type Repository interface {
-	Insert(t Timelog) (Timelog, error)
+	Create(t Timelog) (Timelog, error)
 	FindByUID(uid string) (Timelog, error)
-	Update(uid string, updated Timelog) (Timelog, error)
-	SoftDelete(uid string) error
+	Update(uid string, updateFn func(Timelog) Timelog) (Timelog, error)
 	FindLatestByContractor(contractorID uuid.UUID) ([]Timelog, error)
+	FindLatestByContractorInPeriod(contractorID uuid.UUID, start, end time.Time) ([]Timelog, error)
+	FindByJobUID(jobUID uuid.UUID) ([]Timelog, error)
+	GetVersionHistory(id string) ([]Timelog, error)
 }
 
 type repo struct {
-	scd *scd.SCDManager[Timelog]
+	scd scd.SCDRepository[Timelog]
 }
 
 func NewRepository(db *gorm.DB) Repository {
 	return &repo{scd: scd.NewManager[Timelog](db)}
 }
 
-func (r *repo) Insert(t Timelog) (Timelog, error) {
-	err := r.scd.Insert(t)
-	return t, err
+func (r *repo) Create(t Timelog) (Timelog, error) {
+	return r.scd.Create(t)
 }
 
 func (r *repo) FindByUID(uid string) (Timelog, error) {
 	return r.scd.FindByUID(uid)
 }
 
-func (r *repo) Update(uid string, updated Timelog) (Timelog, error) {
-	old, err := r.scd.FindByUID(uid)
-	if err != nil {
-		return Timelog{}, err
-	}
-	newVer := old.CopyForNewVersion()
-	newVer.StartTime = updated.StartTime
-	newVer.EndTime = updated.EndTime
-	newVer.ContractorID = updated.ContractorID
-	err = r.scd.Insert(newVer)
-	return newVer, err
-}
-
-func (r *repo) SoftDelete(uid string) error {
-	old, err := r.FindByUID(uid)
-	if err != nil {
-		return err
-	}
-	newVer := old.CopyForNewVersion()
-	newVer.EndTime = newVer.StartTime // Mark invalid
-	return r.scd.Insert(newVer)
+func (r *repo) Update(uid string, updateFn func(Timelog) Timelog) (Timelog, error) {
+	return r.scd.Update(uid, updateFn)
 }
 
 func (r *repo) FindLatestByContractor(contractorID uuid.UUID) ([]Timelog, error) {
-	var list []Timelog
-	err := r.scd.GetLatest().Where("contractor_id = ?", contractorID).Find(&list).Error
-	return list, err
+	return r.scd.Query().
+		Latest().
+		Where("contractor_id = ?", contractorID).
+		Order("start_time DESC").
+		Find()
+}
+
+func (r *repo) FindLatestByContractorInPeriod(contractorID uuid.UUID, start, end time.Time) ([]Timelog, error) {
+	return r.scd.Query().
+		Latest().
+		Where("contractor_id = ?", contractorID).
+		BetweenDates(start, end).
+		Order("start_time DESC").
+		Find()
+}
+
+func (r *repo) FindByJobUID(jobUID uuid.UUID) ([]Timelog, error) {
+	return r.scd.Query().
+		Latest().
+		Where("job_uid = ?", jobUID).
+		Order("start_time DESC").
+		Find()
+}
+
+func (r *repo) GetVersionHistory(id string) ([]Timelog, error) {
+	return r.scd.GetVersionHistory(id)
 }

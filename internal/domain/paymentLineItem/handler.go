@@ -3,7 +3,7 @@ package payment
 import (
 	"net/http"
 	"github.com/gin-gonic/gin"
-);
+)
 
 type Handler struct {
 	svc Service
@@ -45,12 +45,27 @@ func (h *Handler) GetByUID(c *gin.Context) {
 }
 
 func (h *Handler) Update(c *gin.Context) {
-	var req PaymentLineItem
-	if err := c.ShouldBindJSON(&req); err != nil {
+	var updateData struct {
+		Status string  `json:"status"`
+		Amount float64 `json:"amount"`
+	}
+	if err := c.ShouldBindJSON(&updateData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	resp, err := h.svc.Update(c.Param("uid"), req)
+	
+	var resp PaymentLineItem
+	var err error
+	
+	if updateData.Status != "" {
+		resp, err = h.svc.UpdateStatus(c.Param("uid"), updateData.Status)
+	} else if updateData.Amount > 0 {
+		resp, err = h.svc.UpdateAmount(c.Param("uid"), updateData.Amount)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Either status or amount must be provided"})
+		return
+	}
+	
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -59,7 +74,8 @@ func (h *Handler) Update(c *gin.Context) {
 }
 
 func (h *Handler) Delete(c *gin.Context) {
-	err := h.svc.Delete(c.Param("uid"))
+	// For SCD, we don't actually delete but mark as cancelled
+	_, err := h.svc.UpdateStatus(c.Param("uid"), "cancelled")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -6,7 +6,7 @@ import (
 
 	jobs "mercor/internal/domain/jobs"
 	paymentLineItem "mercor/internal/domain/paymentLineItem"
-	timelog"mercor/internal/domain/timelog"
+	timelog "mercor/internal/domain/timelog"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -18,7 +18,7 @@ func Seed(db *gorm.DB) {
 		{
 			ID:           uuid.MustParse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), // job_ckbk6oo4hn7pacdgcz9f
 			Version:      1,
-			UID:          uuid.MustParse("00000000-0000-0000-0000-000000000001"), // job_uid_tm15dj18wal295r3xiea
+			UID:          uuid.MustParse("00000000-0000-0000-0000-000000000005"), // job_uid_tm15dj18wal295r3xiea
 			Status:       "extended",
 			Rate:         20.0,
 			Title:        "Software Engineer",

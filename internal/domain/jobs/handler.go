@@ -27,11 +27,12 @@ func (h *Handler) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.svc.CreateJob(job); err != nil {
+	createdJob, err := h.svc.CreateJob(job)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, job)
+	c.JSON(http.StatusCreated, createdJob)
 }
 
 func (h *Handler) GetByUID(c *gin.Context) {
@@ -44,12 +45,15 @@ func (h *Handler) GetByUID(c *gin.Context) {
 }
 
 func (h *Handler) Update(c *gin.Context) {
-	var updated Job
-	if err := c.ShouldBindJSON(&updated); err != nil {
+	var updateData struct {
+		Title string  `json:"title"`
+		Rate  float64 `json:"rate"`
+	}
+	if err := c.ShouldBindJSON(&updateData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	job, err := h.svc.Update(c.Param("uid"), updated)
+	job, err := h.svc.UpdateJob(c.Param("uid"), updateData.Title, updateData.Rate)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

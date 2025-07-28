@@ -20,9 +20,20 @@ type Job struct {
 
 func (Job) TableName() string { return "jobs" }
 
-func (j Job) GetID() string     { return j.ID.String() }
-func (j Job) GetUID() string    { return j.UID.String() }
-func (j Job) GetVersion() int   { return j.Version }
+func (j Job) GetID() string   { return j.ID.String() }
+func (j Job) GetUID() string  { return j.UID.String() }
+func (j Job) GetVersion() int { return j.Version }
+
+func (j Job) SetCreatedAt(t time.Time) Job {
+	j.CreatedAt = t
+	return j
+}
+
+func (j Job) SetUpdatedAt(t time.Time) Job {
+	j.UpdatedAt = t
+	return j
+}
+
 func (j Job) CopyForNewVersion() Job {
 	return Job{
 		ID:           j.ID,
@@ -33,5 +44,6 @@ func (j Job) CopyForNewVersion() Job {
 		ContractorID: j.ContractorID,
 		Version:      j.Version + 1,
 		UID:          uuid.New(),
+		// CreatedAt and UpdatedAt will be set by the SCD manager
 	}
 }

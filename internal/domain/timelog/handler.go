@@ -45,12 +45,27 @@ func (h *Handler) GetByUID(c *gin.Context) {
 }
 
 func (h *Handler) Update(c *gin.Context) {
-	var req Timelog
-	if err := c.ShouldBindJSON(&req); err != nil {
+	var updateData struct {
+		Duration int64  `json:"duration"`
+		Type     string `json:"type"`
+	}
+	if err := c.ShouldBindJSON(&updateData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	resp, err := h.svc.Update(c.Param("uid"), req)
+
+	var resp Timelog
+	var err error
+
+	if updateData.Duration > 0 {
+		resp, err = h.svc.UpdateDuration(c.Param("uid"), updateData.Duration)
+	} else if updateData.Type != "" {
+		resp, err = h.svc.UpdateType(c.Param("uid"), updateData.Type)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Either duration or type must be provided"})
+		return
+	}
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -59,7 +74,8 @@ func (h *Handler) Update(c *gin.Context) {
 }
 
 func (h *Handler) Delete(c *gin.Context) {
-	err := h.svc.Delete(c.Param("uid"))
+	// For SCD, we don't actually delete but mark as invalid by setting type
+	_, err := h.svc.UpdateType(c.Param("uid"), "deleted")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
